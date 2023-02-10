@@ -1,0 +1,61 @@
+package org.example;
+
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.sql.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+public class Operations_List {
+
+    Map<String, Callable<String>> commands;
+    private String url;
+    private String user;
+    private String password;
+
+    public Operations_List(JSONObject json) {
+
+        this.url = "jdbc:postgresql://localhost:5432/online_bank";
+        this.user = "postgres";
+        this.password = "2517Pass";
+
+        this.commands = new HashMap<String, Callable<String>>();
+
+        this.commands.put("1", () -> login(json));
+
+
+    }
+
+    public String processing(String cmd) throws Exception {
+        return commands.get(cmd).call();
+    }
+
+    public String login(JSONObject json) throws IOException, SQLException {
+        System.out.println("запрос на вход");
+
+        String query = "select count(id) from bank_test.login_data where login_phone like '"+ json.getString("LOGIN") +"' and password like '"+ json.getString("PASSWORD") +"';";
+
+        try (Connection con = DriverManager.getConnection(url, user, password);
+             Statement st = con.createStatement();
+             ResultSet rs = st.executeQuery(query))
+        {
+            JSONObject json_out = new JSONObject();
+
+            if (rs.next()) {
+                json_out.put("EXIST", rs.getString(1));
+            }
+
+            return json_out.toString();
+
+        } catch (SQLException ex) {
+            System.out.println("error");
+            Logger lgr = Logger.getLogger(ServerSomthing.class.getName());
+            lgr.log(Level.SEVERE, ex.getMessage(), ex);
+        }
+        return null;
+    }
+}
