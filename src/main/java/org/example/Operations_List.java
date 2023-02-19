@@ -17,11 +17,11 @@ public class Operations_List {
     private String user;
     private String password;
 
-    public Operations_List(JSONObject json) {
+    public Operations_List(String adr, String pass, JSONObject json) {
 
-        this.url = "jdbc:postgresql://localhost:5432/online_bank";
+        this.url = String.format("jdbc:postgresql://%s:5432/online_bank", adr);
         this.user = "postgres";
-        this.password = "2517Pass";
+        this.password = String.format("%s", pass);
 
         this.commands = new HashMap<String, Callable<String>>();
 
@@ -36,14 +36,15 @@ public class Operations_List {
 
     public String login(JSONObject json) throws IOException, SQLException {
         System.out.println("запрос на вход");
+        JSONObject json_out = new JSONObject();
 
         String query = "select count(id) from bank_test.login_data where login_phone like '"+ json.getString("LOGIN") +"' and password like '"+ json.getString("PASSWORD") +"';";
+
 
         try (Connection con = DriverManager.getConnection(url, user, password);
              Statement st = con.createStatement();
              ResultSet rs = st.executeQuery(query))
         {
-            JSONObject json_out = new JSONObject();
 
             if (rs.next()) {
                 json_out.put("EXIST", rs.getString(1));
@@ -56,6 +57,7 @@ public class Operations_List {
             Logger lgr = Logger.getLogger(ServerSomthing.class.getName());
             lgr.log(Level.SEVERE, ex.getMessage(), ex);
         }
-        return null;
+        json_out.put("EXIST", "0");
+        return json_out.toString();
     }
 }

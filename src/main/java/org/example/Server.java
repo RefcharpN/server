@@ -6,6 +6,7 @@ import java.io.*;
 import java.net.*;
 import java.sql.*;
 import java.util.LinkedList;
+import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -46,7 +47,7 @@ class ServerSomthing extends Thread {
                     break; // если пришла пустая строка - выходим из цикла прослушки
                 }
 
-                this.oper = new Operations_List(json);
+                this.oper = new Operations_List(Server.pg_adr,Server.pg_password, json);
                 var result = this.oper.processing(json.getString("OPERATION"));
                 System.out.println(result);
                 this.send(result);
@@ -55,8 +56,6 @@ class ServerSomthing extends Thread {
         } catch (NullPointerException ignored) {} catch (Exception e) {
             throw new RuntimeException(e);
         }
-
-
     }
 
     private void send(String msg) {
@@ -90,12 +89,23 @@ class ServerSomthing extends Thread {
 
 
 public class Server {
-
     public static final int PORT = 8080;
+    public static String pg_adr;
+    public static String pg_password;
     public static LinkedList<ServerSomthing> serverList = new LinkedList<>(); // список всех нитей - экземпляров
     // сервера, слушающих каждый своего клиента
 
     public static void main(String[] args) throws IOException {
+
+        BufferedReader cons = new BufferedReader(new InputStreamReader(System.in));
+
+        System.out.println("введите адрес БД");
+        pg_adr = cons.readLine();
+
+        System.out.println("введите пароль БД");
+        pg_password = cons.readLine();
+
+
         ServerSocket server = new ServerSocket(PORT);
         System.out.println("Server Started");
         try {
@@ -114,4 +124,7 @@ public class Server {
             server.close();
         }
     }
+
+
+
 }
