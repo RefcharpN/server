@@ -26,6 +26,7 @@ public class Operations_List {
         this.commands = new HashMap<String, Callable<String>>();
 
         this.commands.put("1", () -> login(json));
+        this.commands.put("2", () -> phone_check(json));
 
 
     }
@@ -38,7 +39,8 @@ public class Operations_List {
         System.out.println("запрос на вход");
         JSONObject json_out = new JSONObject();
 
-        String query = "select count(id) from bank_test.login_data where login_phone like '"+ json.getString("LOGIN") +"' and password like '"+ json.getString("PASSWORD") +"';";
+        String query = "select count(id) from bank_test.login_data where login_phone like '"+ json.getString("LOGIN")
+                +"' and password like '"+ json.getString("PASSWORD") +"';";
 
 
         try (Connection con = DriverManager.getConnection(url, user, password);
@@ -57,6 +59,34 @@ public class Operations_List {
             Logger lgr = Logger.getLogger(ServerSomthing.class.getName());
             lgr.log(Level.SEVERE, ex.getMessage(), ex);
         }
+        json_out.put("EXIST", "0");
+        return json_out.toString();
+    }
+
+    public String phone_check(JSONObject json) throws IOException, SQLException {
+        System.out.println("запрос проверку телфона");
+        JSONObject json_out = new JSONObject();
+
+        String query = String.format("select count(login_phone) from bank_test.login_data where login_phone ilike '%s' ", json.getString("PHONE"));
+
+        try (Connection con = DriverManager.getConnection(url, user, password);
+             Statement st = con.createStatement();
+             ResultSet rs = st.executeQuery(query))
+        {
+
+            if (rs.next()) {
+                json_out.put("EXIST", rs.getString(1));
+            }
+
+            return json_out.toString();
+
+        } catch (SQLException ex) {
+            System.out.println("error");
+            Logger lgr = Logger.getLogger(ServerSomthing.class.getName());
+            lgr.log(Level.SEVERE, ex.getMessage(), ex);
+        }
+
+
         json_out.put("EXIST", "0");
         return json_out.toString();
     }

@@ -49,11 +49,14 @@ class ServerSomthing extends Thread {
 
                 this.oper = new Operations_List(Server.pg_adr,Server.pg_password, json);
                 var result = this.oper.processing(json.getString("OPERATION"));
+
                 System.out.println(result);
+
                 this.send(result);
 
             }
         } catch (NullPointerException ignored) {} catch (Exception e) {
+
             throw new RuntimeException(e);
         }
     }
@@ -98,7 +101,7 @@ public class Server {
     public static void main(String[] args) throws IOException {
 
         BufferedReader cons = new BufferedReader(new InputStreamReader(System.in));
-
+        //инициализация через файл
         System.out.println("введите адрес БД");
         pg_adr = cons.readLine();
 
