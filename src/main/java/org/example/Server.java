@@ -110,10 +110,21 @@ class ServerSomthing extends Thread {
 
     private void send(String msg) {
         try {
-
-            out.write(msg + "\n");
+            Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");//строгое соблюдение
+            cipher.init(Cipher.ENCRYPT_MODE, publicKey_client);
+            out.write(Base64.getEncoder().encodeToString(cipher.doFinal(msg.getBytes())) + "\n");
             out.flush();
-        } catch (IOException ignored) {}
+        } catch (IOException ignored) {} catch (NoSuchPaddingException e) {
+            throw new RuntimeException(e);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        } catch (InvalidKeyException e) {
+            throw new RuntimeException(e);
+        } catch (IllegalBlockSizeException e) {
+            throw new RuntimeException(e);
+        } catch (BadPaddingException e) {
+            throw new RuntimeException(e);
+        }
 
     }
 
