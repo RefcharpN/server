@@ -1,0 +1,3 @@
+мар. 15, 2023 7:30:45 PM org.example.ServerSomthing run
+INFO: расшифрованная строка - {"OPERATION":"1","LOGIN":"111","PASSWORD":"www"}
+результат работы - {"EXIST":"0"}
