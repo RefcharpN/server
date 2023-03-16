@@ -12,12 +12,13 @@ import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
-import java.sql.*;
 import java.util.Base64;
 import java.util.LinkedList;
-import java.util.Scanner;
+import java.util.Properties;
+import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 
 class ServerSomthing extends Thread {
@@ -30,6 +31,7 @@ class ServerSomthing extends Thread {
     PublicKey publicKey = null;
     PublicKey publicKey_client = null;
     PrivateKey privateKey = null;
+    Logger logger;
 
 
     public ServerSomthing(Socket socket) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
@@ -48,6 +50,19 @@ class ServerSomthing extends Thread {
         this.read_key();
         this.send_key();
 
+        logger = Logger.getLogger("MyLog");
+        FileHandler fh;
+        try {
+            fh = new FileHandler("./log/server_log.log", true);
+            logger.addHandler(fh);
+            SimpleFormatter formatter = new SimpleFormatter();
+            fh.setFormatter(formatter);
+        } catch (SecurityException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         start(); // вызываем run()
     }
 
@@ -59,7 +74,7 @@ class ServerSomthing extends Thread {
         try {
             while (true) {
                 input_string = in.readLine();
-                System.out.println(input_string);
+
                 Cipher decryptCipher = Cipher.getInstance("RSA");
                 decryptCipher.init(Cipher.DECRYPT_MODE, privateKey);
 
@@ -80,7 +95,7 @@ class ServerSomthing extends Thread {
                 var out_result = this.oper.processing(json.getString("OPERATION"));
 
                 System.out.println(out_result);
-
+                logger.log(Level.INFO, String.format("расшифрованная строка - %s\nрезультат работы - %s\n", decryptedMessage, out_result));
                 this.send(out_result);
 
             }
@@ -159,13 +174,23 @@ public class Server {
 
     public static void main(String[] args) throws IOException {
 
-        BufferedReader cons = new BufferedReader(new InputStreamReader(System.in));
-        //инициализация через файл
-        System.out.println("введите адрес БД");
-        pg_adr = cons.readLine();
+//        BufferedReader cons = new BufferedReader(new InputStreamReader(System.in));
+//        System.out.println("введите адрес БД");
+//        pg_adr = cons.readLine();
+//        System.out.println("введите пароль БД");
+//        pg_password = cons.readLine();
 
-        System.out.println("введите пароль БД");
-        pg_password = cons.readLine();
+        Properties prop = new Properties();
+        String fileName = "./server.config";
+        try (FileInputStream fis = new FileInputStream(fileName)) {
+            prop.load(fis);
+        } catch (FileNotFoundException ex) {} catch (IOException ex) {}
+
+
+        System.out.println(prop.getProperty("server.address"));
+        pg_adr = prop.getProperty("server.address");
+        System.out.println(prop.getProperty("server.password"));
+        pg_password = prop.getProperty("server.password");
 
 
         ServerSocket server = new ServerSocket(PORT);
@@ -190,7 +215,4 @@ public class Server {
             server.close();
         }
     }
-
-
-
 }
