@@ -1,3 +1,15 @@
 мар. 15, 2023 7:30:45 PM org.example.ServerSomthing run
 INFO: расшифрованная строка - {"OPERATION":"1","LOGIN":"111","PASSWORD":"www"}
 результат работы - {"EXIST":"0"}
+мар. 18, 2023 2:16:02 PM org.example.ServerSomthing run
+INFO: расшифрованная строка - {"OPERATION":"1","LOGIN":"+79031299810","PASSWORD":"2517Pass"}
+результат работы - {"EXIST":"1"}
+
+мар. 18, 2023 3:39:36 PM org.example.ServerSomthing run
+INFO: расшифрованная строка - {"OPERATION":"1","LOGIN":"1","PASSWORD":"q"}
+результат работы - {"EXIST":"0"}
+
+мар. 18, 2023 3:39:54 PM org.example.ServerSomthing run
+INFO: расшифрованная строка - {"OPERATION":"1","LOGIN":"+79031299810","PASSWORD":"2517Pass"}
+результат работы - {"EXIST":"1"}
+

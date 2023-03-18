@@ -24,9 +24,10 @@ public class Operations_List {
         this.password = String.format("%s", pass);
 
         this.commands = new HashMap<String, Callable<String>>();
-
+        //TODO:здесь список операций
         this.commands.put("1", () -> login(json));
         this.commands.put("2", () -> phone_check(json));
+        this.commands.put("3", () -> registration_user(json));
 
 
     }
@@ -64,7 +65,7 @@ public class Operations_List {
     }
 
     public String phone_check(JSONObject json) throws IOException, SQLException {
-        System.out.println("запрос проверку телфона");
+        System.out.println("запрос проверки телфона");
         JSONObject json_out = new JSONObject();
 
         String query = String.format("select count(login_phone) from bank_test.login_data where login_phone ilike '%s' ", json.getString("PHONE"));
@@ -89,5 +90,10 @@ public class Operations_List {
 
         json_out.put("EXIST", "0");
         return json_out.toString();
+    }
+
+    public String registration_user(JSONObject json)
+    {
+        return null;
     }
 }
