@@ -33,7 +33,7 @@ class ServerSomthing extends Thread {
     PublicKey publicKey = null;
     PublicKey publicKey_client = null;
     PrivateKey privateKey = null;
-    Logger logger;
+
 
 
 
@@ -52,26 +52,6 @@ class ServerSomthing extends Thread {
         this.publicKey = pair.getPublic();
         this.read_key();
         this.send_key();
-
-
-        String filePattern = "./log/log.log";
-        int limit = 1000 * 1000; // 1 Mb
-        int numLogFiles = 3;
-
-        logger = Logger.getLogger("MyLog");
-        FileHandler fh;
-        try {
-            fh = new FileHandler(filePattern, limit, numLogFiles,true);
-            logger.addHandler(fh);
-            SimpleFormatter formatter = new SimpleFormatter();
-            fh.setFormatter(formatter);
-        } catch (SecurityException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-
 
         start(); // вызываем run()
     }
@@ -98,14 +78,10 @@ class ServerSomthing extends Thread {
                     break; // если пришла пустая строка - выходим из цикла прослушки
                 }
 
-
-                System.out.println(decryptedMessage);
-
                 this.oper = new Operations_List(Server.pg_adr,Server.pg_password, json);
                 var out_result = this.oper.processing(json.getString("OPERATION"));
 
-                System.out.println(out_result);
-                logger.log(Level.INFO, String.format("расшифрованная строка - %s\nрезультат работы - %s\n", decryptedMessage, out_result));
+                Server.logger.log(Level.INFO, String.format("расшифрованная строка - %s\nрезультат работы - %s\n", decryptedMessage, out_result));
                 this.send(out_result);
 
             }
@@ -182,6 +158,7 @@ public class Server {
     public static String pg_password;
     public static LinkedList<ServerSomthing> serverList = new LinkedList<>(); // список всех нитей - экземпляров
     // сервера, слушающих каждый своего клиента
+    public static Logger logger;
 
     public static void main(String[] args) throws IOException {
 
@@ -196,6 +173,24 @@ public class Server {
         try (FileInputStream fis = new FileInputStream(fileName)) {
             prop.load(fis);
         } catch (FileNotFoundException ex) {} catch (IOException ex) {}
+
+
+        String filePattern = "./log/log.log";
+        int limit = 1000 * 1000; // 1 Mb
+        int numLogFiles = 3;
+
+        logger = Logger.getLogger("MyLog");
+        FileHandler fh;
+        try {
+            fh = new FileHandler(filePattern, limit, numLogFiles,true);
+            logger.addHandler(fh);
+            SimpleFormatter formatter = new SimpleFormatter();
+            fh.setFormatter(formatter);
+        } catch (SecurityException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
 
         System.out.println(prop.getProperty("server.address"));
