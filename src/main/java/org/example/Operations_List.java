@@ -94,6 +94,29 @@ public class Operations_List {
 
     public String registration_user(JSONObject json)
     {
-        return null;
+        System.out.println("регистрация клиента");
+        JSONObject json_out = new JSONObject();
+
+        String query = String.format("", json.getString("PHONE"));
+
+
+        try (Connection con = DriverManager.getConnection(url, user, password);
+             Statement st = con.createStatement();
+             ResultSet rs = st.executeQuery(query))
+        {
+
+            if (rs.next()) {
+                json_out.put("EXIST", rs.getString(1));
+            }
+
+            return json_out.toString();
+
+        } catch (SQLException ex) {
+            System.out.println("error");
+            Logger lgr = Logger.getLogger(ServerSomthing.class.getName());
+            lgr.log(Level.SEVERE, ex.getMessage(), ex);
+        }
+
+        return json_out.toString();
     }
 }

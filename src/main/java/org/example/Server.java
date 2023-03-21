@@ -21,6 +21,8 @@ import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
 
+
+
 class ServerSomthing extends Thread {
 
     private Socket socket; // сокет, через который сервер общается с клиентом,
@@ -32,6 +34,7 @@ class ServerSomthing extends Thread {
     PublicKey publicKey_client = null;
     PrivateKey privateKey = null;
     Logger logger;
+
 
 
     public ServerSomthing(Socket socket) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
@@ -50,10 +53,15 @@ class ServerSomthing extends Thread {
         this.read_key();
         this.send_key();
 
+
+        String filePattern = "./log/log.log";
+        int limit = 1000 * 1000; // 1 Mb
+        int numLogFiles = 3;
+
         logger = Logger.getLogger("MyLog");
         FileHandler fh;
         try {
-            fh = new FileHandler("./log/server_log.log", true);
+            fh = new FileHandler(filePattern, limit, numLogFiles,true);
             logger.addHandler(fh);
             SimpleFormatter formatter = new SimpleFormatter();
             fh.setFormatter(formatter);
@@ -62,6 +70,8 @@ class ServerSomthing extends Thread {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+
 
         start(); // вызываем run()
     }
@@ -107,6 +117,7 @@ class ServerSomthing extends Thread {
 
 
     private void read_key() throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
+
         String input_string = in.readLine();
 
         byte[] data = Base64.getDecoder().decode(input_string.getBytes());
