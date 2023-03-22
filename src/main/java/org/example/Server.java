@@ -37,6 +37,7 @@ class ServerSomthing extends Thread {
 
 
     public ServerSomthing(Socket socket) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
+
         this.socket = socket;
 
         in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -86,23 +87,32 @@ class ServerSomthing extends Thread {
             }
         } catch (NullPointerException ignored)
         {
-            Server.logger_error.log(Level.INFO, "ошибка в функции run - NullPointerException - класс server");
+            Server.logger_error.log(Level.INFO, "ошибка в функции run - NullPointerException - класс ServerSomthing");
+            this.downService();
         }
         catch (Exception e) {
-            Server.logger_error.log(Level.INFO, "ошибка в функции run - Exception - класс server");
+            Server.logger_error.log(Level.INFO, "ошибка в функции run - Exception - класс ServerSomthing");
+            this.downService();
             throw new RuntimeException(e);
         }
     }
 
 
-    private void read_key() throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
+    private void read_key()  {
+        try
+        {
+            String input_string = in.readLine();
 
-        String input_string = in.readLine();
-
-        byte[] data = Base64.getDecoder().decode(input_string.getBytes());
-        X509EncodedKeySpec spec = new X509EncodedKeySpec(data);
-        KeyFactory fact = KeyFactory.getInstance("RSA");
-        this.publicKey_client = fact.generatePublic(spec);
+            byte[] data = Base64.getDecoder().decode(input_string.getBytes());
+            X509EncodedKeySpec spec = new X509EncodedKeySpec(data);
+            KeyFactory fact = KeyFactory.getInstance("RSA");
+            this.publicKey_client = fact.generatePublic(spec);
+        }
+        catch (IOException | NoSuchAlgorithmException | InvalidKeySpecException e)
+        {
+            Server.logger_error.log(Level.INFO, "ошибка в функции read_key - IOException | NoSuchAlgorithmException | InvalidKeySpecException - класс ServerSomthing");
+            this.downService();
+        }
     }
 
     private void send_key() {
@@ -111,7 +121,8 @@ class ServerSomthing extends Thread {
             out.flush();
         } catch (IOException ignored)
         {
-            Server.logger_error.log(Level.INFO, "ошибка в функции send_key - IOexception - класс server");
+            Server.logger_error.log(Level.INFO, "ошибка в функции send_key - IOexception - класс ServerSomthing");
+            this.downService();
         }
 
     }
@@ -125,11 +136,13 @@ class ServerSomthing extends Thread {
         }
         catch (IOException ignored)
         {
-            Server.logger_error.log(Level.INFO, "ошибка в функции send - IOexception - класс server");
+            Server.logger_error.log(Level.INFO, "ошибка в функции send - IOexception - класс ServerSomthing");
+            this.downService();
         }
         catch (NoSuchPaddingException | NoSuchAlgorithmException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException e)
         {
-            Server.logger_error.log(Level.INFO, "ошибка в функции send - NoSuchPaddingException | NoSuchAlgorithmException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException - класс server");
+            Server.logger_error.log(Level.INFO, "ошибка в функции send - NoSuchPaddingException | NoSuchAlgorithmException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException - класс ServerSomthing");
+            this.downService();
             throw new RuntimeException(e);
         }
 
@@ -153,7 +166,7 @@ class ServerSomthing extends Thread {
             }
         } catch (IOException ignored)
         {
-            Server.logger_error.log(Level.INFO, "ошибка в функции downService - IOexception - класс server");
+            Server.logger_error.log(Level.INFO, "ошибка в функции downService - IOexception - класс ServerSomthing");
         }
     }
 }
@@ -168,7 +181,7 @@ public class Server {
     public static Logger logger;
     public static Logger logger_error;
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
 
 //        BufferedReader cons = new BufferedReader(new InputStreamReader(System.in));
 //        System.out.println("введите адрес БД");
@@ -217,30 +230,32 @@ public class Server {
         System.out.println(prop.getProperty("server.password"));
         pg_password = prop.getProperty("server.password");
 
-
-        ServerSocket server = new ServerSocket(PORT);
-        System.out.println("Server Started");
         try {
-            while (true) {
-                // Блокируется до возникновения нового соединения:
-                Socket socket = server.accept();
-                try {
-                    serverList.add(new ServerSomthing(socket)); // добавить новое соединенние в список
-                } catch (IOException e)
-                {
-                    // Если завершится неудачей, закрывается сокет,
-                    // в противном случае, нить закроет его:
-                    logger_error.log(Level.INFO, "ошибка в функции main - IOexception - класс server");
-                    socket.close();
+            ServerSocket server = new ServerSocket(PORT);
+            System.out.println("Server Started");
+            try {
+                while (true) {
+                    // Блокируется до возникновения нового соединения:
+                    Socket socket = server.accept();
+                    try {
+                        serverList.add(new ServerSomthing(socket)); // добавить новое соединенние в список
+                    } catch (IOException e) {
+                        // Если завершится неудачей, закрывается сокет,
+                        // в противном случае, нить закроет его:
+                        logger_error.log(Level.INFO, "ошибка в функции main - IOexception - класс server");
+                        socket.close();
+                    } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+                        logger_error.log(Level.INFO, "ошибка в функции main - NoSuchAlgorithmException | InvalidKeySpecException - класс server");
+                        throw new RuntimeException(e);
+                    }
                 }
-                catch (NoSuchAlgorithmException | InvalidKeySpecException e)
-                {
-                    logger_error.log(Level.INFO, "ошибка в функции main - NoSuchAlgorithmException | InvalidKeySpecException - класс server");
-                    throw new RuntimeException(e);
-                }
+            } finally {
+                server.close();
             }
-        } finally {
-            server.close();
+        }
+        catch (IOException e)
+        {
+            logger_error.log(Level.INFO, "ошибка в функции main - IOexception - класс server");
         }
     }
 }
