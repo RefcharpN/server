@@ -56,9 +56,7 @@ public class Operations_List {
             return json_out.toString();
 
         } catch (SQLException ex) {
-            System.out.println("error");
-            Logger lgr = Logger.getLogger(ServerSomthing.class.getName());
-            lgr.log(Level.SEVERE, ex.getMessage(), ex);
+            Server.logger_error.log(Level.INFO, "ошибка в функции login - SQLException - класс Operation_list");
         }
         json_out.put("EXIST", "0");
         return json_out.toString();
@@ -81,10 +79,9 @@ public class Operations_List {
 
             return json_out.toString();
 
-        } catch (SQLException ex) {
-            System.out.println("error");
-            Logger lgr = Logger.getLogger(ServerSomthing.class.getName());
-            lgr.log(Level.SEVERE, ex.getMessage(), ex);
+        } catch (SQLException ex)
+        {
+            Server.logger_error.log(Level.INFO, "ошибка в функции phone_check - SQLException - класс Operation_list");
         }
 
 
@@ -112,9 +109,7 @@ public class Operations_List {
             return json_out.toString();
 
         } catch (SQLException ex) {
-            System.out.println("error");
-            Logger lgr = Logger.getLogger(ServerSomthing.class.getName());
-            lgr.log(Level.SEVERE, ex.getMessage(), ex);
+            Server.logger_error.log(Level.INFO, "ошибка в функции registration_user - SQLException - класс Operation_list");
         }
 
         return json_out.toString();

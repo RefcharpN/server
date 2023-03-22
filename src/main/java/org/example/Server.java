@@ -24,7 +24,6 @@ import java.util.logging.SimpleFormatter;
 
 
 class ServerSomthing extends Thread {
-
     private Socket socket; // сокет, через который сервер общается с клиентом,
     // кроме него - клиент и сервер никак не связаны
     private BufferedReader in; // поток чтения из сокета
@@ -75,7 +74,7 @@ class ServerSomthing extends Thread {
 
                 if(json.getString("OPERATION").equals("-1")) {
                     this.downService(); // харакири
-                    break; // если пришла пустая строка - выходим из цикла прослушки
+                    break;
                 }
 
                 this.oper = new Operations_List(Server.pg_adr,Server.pg_password, json);
@@ -85,8 +84,12 @@ class ServerSomthing extends Thread {
                 this.send(out_result);
 
             }
-        } catch (NullPointerException ignored) {} catch (Exception e) {
-
+        } catch (NullPointerException ignored)
+        {
+            Server.logger_error.log(Level.INFO, "ошибка в функции run - NullPointerException - класс server");
+        }
+        catch (Exception e) {
+            Server.logger_error.log(Level.INFO, "ошибка в функции run - Exception - класс server");
             throw new RuntimeException(e);
         }
     }
@@ -106,7 +109,10 @@ class ServerSomthing extends Thread {
         try {
             out.write(Base64.getEncoder().encodeToString(publicKey.getEncoded()) + "\n");
             out.flush();
-        } catch (IOException ignored) {}
+        } catch (IOException ignored)
+        {
+            Server.logger_error.log(Level.INFO, "ошибка в функции send_key - IOexception - класс server");
+        }
 
     }
 
@@ -116,15 +122,14 @@ class ServerSomthing extends Thread {
             cipher.init(Cipher.ENCRYPT_MODE, publicKey_client);
             out.write(Base64.getEncoder().encodeToString(cipher.doFinal(msg.getBytes())) + "\n");
             out.flush();
-        } catch (IOException ignored) {} catch (NoSuchPaddingException e) {
-            throw new RuntimeException(e);
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        } catch (InvalidKeyException e) {
-            throw new RuntimeException(e);
-        } catch (IllegalBlockSizeException e) {
-            throw new RuntimeException(e);
-        } catch (BadPaddingException e) {
+        }
+        catch (IOException ignored)
+        {
+            Server.logger_error.log(Level.INFO, "ошибка в функции send - IOexception - класс server");
+        }
+        catch (NoSuchPaddingException | NoSuchAlgorithmException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException e)
+        {
+            Server.logger_error.log(Level.INFO, "ошибка в функции send - NoSuchPaddingException | NoSuchAlgorithmException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException - класс server");
             throw new RuntimeException(e);
         }
 
@@ -146,19 +151,22 @@ class ServerSomthing extends Thread {
                 }
                 System.out.println("соединение разорвано \n");
             }
-        } catch (IOException ignored) {}
+        } catch (IOException ignored)
+        {
+            Server.logger_error.log(Level.INFO, "ошибка в функции downService - IOexception - класс server");
+        }
     }
 }
 
 
 
 public class Server {
-    public static final int PORT = 8080;
+    private static final int PORT = 8080;
     public static String pg_adr;
     public static String pg_password;
-    public static LinkedList<ServerSomthing> serverList = new LinkedList<>(); // список всех нитей - экземпляров
-    // сервера, слушающих каждый своего клиента
+    public static LinkedList<ServerSomthing> serverList = new LinkedList<>(); // список всех нитей - экземпляров сервера, слушающих каждый своего клиента
     public static Logger logger;
+    public static Logger logger_error;
 
     public static void main(String[] args) throws IOException {
 
@@ -172,7 +180,7 @@ public class Server {
         String fileName = "./server.config";
         try (FileInputStream fis = new FileInputStream(fileName)) {
             prop.load(fis);
-        } catch (FileNotFoundException ex) {} catch (IOException ex) {}
+        } catch (IOException ex) {}
 
 
         String filePattern = "./log/log.log";
@@ -186,9 +194,20 @@ public class Server {
             logger.addHandler(fh);
             SimpleFormatter formatter = new SimpleFormatter();
             fh.setFormatter(formatter);
-        } catch (SecurityException e) {
+        } catch (SecurityException | IOException e) {
             e.printStackTrace();
-        } catch (IOException e) {
+        }
+
+
+        String filePattern_error = "./log_error/log.log";
+        logger_error = Logger.getLogger("MyLog");
+        FileHandler fh_error;
+        try {
+            fh_error = new FileHandler(filePattern_error, limit, numLogFiles,true);
+            logger.addHandler(fh_error);
+            SimpleFormatter formatter = new SimpleFormatter();
+            fh_error.setFormatter(formatter);
+        } catch (SecurityException | IOException e) {
             e.printStackTrace();
         }
 
@@ -207,13 +226,16 @@ public class Server {
                 Socket socket = server.accept();
                 try {
                     serverList.add(new ServerSomthing(socket)); // добавить новое соединенние в список
-                } catch (IOException e) {
+                } catch (IOException e)
+                {
                     // Если завершится неудачей, закрывается сокет,
                     // в противном случае, нить закроет его:
+                    logger_error.log(Level.INFO, "ошибка в функции main - IOexception - класс server");
                     socket.close();
-                } catch (NoSuchAlgorithmException e) {
-                    throw new RuntimeException(e);
-                } catch (InvalidKeySpecException e) {
+                }
+                catch (NoSuchAlgorithmException | InvalidKeySpecException e)
+                {
+                    logger_error.log(Level.INFO, "ошибка в функции main - NoSuchAlgorithmException | InvalidKeySpecException - класс server");
                     throw new RuntimeException(e);
                 }
             }
