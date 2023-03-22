@@ -50,8 +50,15 @@ class ServerSomthing extends Thread {
 
         this.privateKey = pair.getPrivate();
         this.publicKey = pair.getPublic();
-        this.read_key();
-        this.send_key();
+        try {
+            this.read_key();
+            this.send_key();
+        }
+        catch (Exception e)
+        {
+            this.downService();
+            return;
+        }
 
         start(); // вызываем run()
     }
@@ -98,7 +105,7 @@ class ServerSomthing extends Thread {
     }
 
 
-    private void read_key()  {
+    private void read_key() throws Exception {
         try
         {
             String input_string_key = in.readLine();
@@ -116,18 +123,18 @@ class ServerSomthing extends Thread {
         catch (Exception e)
         {
             Server.logger_error.log(Level.INFO, "ошибка в функции read_key - Exception - класс ServerSomthing");
-            this.downService();
+            throw new Exception();
         }
     }
 
-    private void send_key() {
+    private void send_key() throws Exception{
         try {
             out.write(Base64.getEncoder().encodeToString(publicKey.getEncoded()) + "\n");
             out.flush();
         } catch (IOException ignored)
         {
             Server.logger_error.log(Level.INFO, "ошибка в функции send_key - IOexception - класс ServerSomthing");
-            this.downService();
+            throw new Exception();
         }
 
     }
@@ -179,7 +186,7 @@ class ServerSomthing extends Thread {
 
 
 public class Server {
-    private static final int PORT = 8080;
+    private static int PORT;
     public static String pg_adr;
     public static String pg_password;
     public static LinkedList<ServerSomthing> serverList = new LinkedList<>(); // список всех нитей - экземпляров сервера, слушающих каждый своего клиента
@@ -233,8 +240,12 @@ public class Server {
 
         System.out.println(prop.getProperty("server.address"));
         pg_adr = prop.getProperty("server.address");
+
         System.out.println(prop.getProperty("server.password"));
         pg_password = prop.getProperty("server.password");
+
+        System.out.println(prop.getProperty("server.port"));
+        PORT = Integer.valueOf(prop.getProperty("server.port"));
 
         try {
             ServerSocket server = new ServerSocket(PORT);
