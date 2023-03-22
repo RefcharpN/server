@@ -200,7 +200,7 @@ public class Server {
 
 
         String filePattern_error = "./log_error/log.log";
-        logger_error = Logger.getLogger("MyLog");
+        logger_error = Logger.getLogger("MyLog_error");
         FileHandler fh_error;
         try {
             fh_error = new FileHandler(filePattern_error, limit, numLogFiles,true);
