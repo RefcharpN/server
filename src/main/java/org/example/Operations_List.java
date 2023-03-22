@@ -36,7 +36,7 @@ public class Operations_List {
         return commands.get(cmd).call();
     }
 
-    public String login(JSONObject json) throws IOException, SQLException {
+    public String login(JSONObject json) {
         System.out.println("запрос на вход");
         JSONObject json_out = new JSONObject();
 
@@ -62,7 +62,7 @@ public class Operations_List {
         return json_out.toString();
     }
 
-    public String phone_check(JSONObject json) throws IOException, SQLException {
+    public String phone_check(JSONObject json) {
         System.out.println("запрос проверки телфона");
         JSONObject json_out = new JSONObject();
 

@@ -101,16 +101,21 @@ class ServerSomthing extends Thread {
     private void read_key()  {
         try
         {
-            String input_string = in.readLine();
+            String input_string_key = in.readLine();
 
-            byte[] data = Base64.getDecoder().decode(input_string.getBytes());
+            if (input_string_key.isEmpty())
+            {
+                throw new Exception("пустая строка");
+            }
+
+            byte[] data = Base64.getDecoder().decode(input_string_key.getBytes());
             X509EncodedKeySpec spec = new X509EncodedKeySpec(data);
             KeyFactory fact = KeyFactory.getInstance("RSA");
             this.publicKey_client = fact.generatePublic(spec);
         }
-        catch (IOException | NoSuchAlgorithmException | InvalidKeySpecException e)
+        catch (Exception e)
         {
-            Server.logger_error.log(Level.INFO, "ошибка в функции read_key - IOException | NoSuchAlgorithmException | InvalidKeySpecException - класс ServerSomthing");
+            Server.logger_error.log(Level.INFO, "ошибка в функции read_key - Exception - класс ServerSomthing");
             this.downService();
         }
     }
@@ -180,6 +185,7 @@ public class Server {
     public static LinkedList<ServerSomthing> serverList = new LinkedList<>(); // список всех нитей - экземпляров сервера, слушающих каждый своего клиента
     public static Logger logger;
     public static Logger logger_error;
+
 
     public static void main(String[] args) {
 
