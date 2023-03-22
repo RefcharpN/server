@@ -204,7 +204,7 @@ public class Server {
         FileHandler fh_error;
         try {
             fh_error = new FileHandler(filePattern_error, limit, numLogFiles,true);
-            logger.addHandler(fh_error);
+            logger_error.addHandler(fh_error);
             SimpleFormatter formatter = new SimpleFormatter();
             fh_error.setFormatter(formatter);
         } catch (SecurityException | IOException e) {
