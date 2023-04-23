@@ -40,9 +40,7 @@ public class Operations_List {
         System.out.println("запрос на вход");
         JSONObject json_out = new JSONObject();
 
-        String query = "select count(id) from bank_test.login_data where login_phone like '"+ json.getString("LOGIN")
-                +"' and password like '"+ json.getString("PASSWORD") +"';";
-
+        String query = String.format("select * from bank_test.login('%s','%s')", json.getString("LOGIN"), json.getString("PASSWORD"));
 
         try (Connection con = DriverManager.getConnection(url, user, password);
              Statement st = con.createStatement();
@@ -56,17 +54,17 @@ public class Operations_List {
             return json_out.toString();
 
         } catch (SQLException ex) {
-            Server.logger_error.log(Level.INFO, "ошибка в функции login - SQLException - класс Operation_list");
+            Server.logger_error.log(Level.INFO, "ошибка в функции login - SQLException - класс Operation_list" + ex);
         }
         json_out.put("EXIST", "0");
         return json_out.toString();
     }
 
     public String phone_check(JSONObject json) {
-        System.out.println("запрос проверки телфона");
+        System.out.println("запрос проверки телефона");
         JSONObject json_out = new JSONObject();
 
-        String query = String.format("select count(login_phone) from bank_test.login_data where login_phone ilike '%s' ", json.getString("PHONE"));
+        String query = String.format("select * from bank_test.phone_check('%s')", json.getString("PHONE"));
 
         try (Connection con = DriverManager.getConnection(url, user, password);
              Statement st = con.createStatement();
@@ -94,12 +92,12 @@ public class Operations_List {
         System.out.println("регистрация клиента");
         JSONObject json_out = new JSONObject();
 
-        String query = String.format("", json.getString("PHONE"));
+        String query = String.format("", json.getString("phone"));
 
 
         try (Connection con = DriverManager.getConnection(url, user, password);
              Statement st = con.createStatement();
-             ResultSet rs = st.executeQuery(query))
+             ResultSet rs = st.executeQuery(query))//TODO проверка ошибок выполнения
         {
 
             if (rs.next()) {
