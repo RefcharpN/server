@@ -1,0 +1,9 @@
+мар. 23, 2023 9:56:05 PM org.example.Operations_List login
+INFO: ошибка в функции login - SQLException - класс Operation_list
+мар. 23, 2023 9:57:13 PM org.example.Operations_List login
+INFO: ошибка в функции login - SQLException - класс Operation_list
+мар. 23, 2023 9:57:50 PM org.example.Operations_List login
+INFO: ошибка в функции login - SQLException - класс Operation_listorg.postgresql.util.PSQLException: ОШИБКА: ошибка синтаксиса (примерное положение: "Pass")
+  Позиция: 48
+мар. 23, 2023 9:58:17 PM org.example.Operations_List login
+INFO: ошибка в функции login - SQLException - класс Operation_listorg.postgresql.util.PSQLException: Индекс колонки вне диапазона: 0. Допустимые значения: 1..1

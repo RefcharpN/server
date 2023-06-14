@@ -92,24 +92,31 @@ public class Operations_List {
         System.out.println("регистрация клиента");
         JSONObject json_out = new JSONObject();
 
-        String query = String.format("", json.getString("phone"));
+        String query = String.format("select * from bank_test.client_register('%s', '%s', '%s', '%s', '%s', %s, %s, '%s', '%s')",
+                json.getString("phone"),
+                json.getString("password"),json.getString("lname"),
+                json.getString("fname"),json.getString("mname"),
+                json.getString("series"),json.getString("number"),
+                json.getString("date"),json.getString("department"));
 
 
         try (Connection con = DriverManager.getConnection(url, user, password);
              Statement st = con.createStatement();
              ResultSet rs = st.executeQuery(query))//TODO проверка ошибок выполнения
         {
-
-            if (rs.next()) {
-                json_out.put("EXIST", rs.getString(1));
-            }
-
-            return json_out.toString();
+//
+//            if (rs.next()) {
+//                json_out.put("EXIST", rs.getString(1));
+//            }
+//            return json_out.toString();
 
         } catch (SQLException ex) {
             Server.logger_error.log(Level.INFO, "ошибка в функции registration_user - SQLException - класс Operation_list");
+            json_out.put("register_status", "1");
+            return json_out.toString();
         }
 
+        json_out.put("register_status", "0");
         return json_out.toString();
     }
 }
